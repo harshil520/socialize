@@ -1,7 +1,7 @@
 const { Schema, default: mongoose, model } = require("mongoose");
 
 const messageScheme = new Schema({
-    conversationID: {
+    conversationId: {
         type: mongoose.Schema.ObjectId,
         ref: "Conversation",
         required: true,

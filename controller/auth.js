@@ -50,7 +50,7 @@ const login = async (req, res) => {
 
         const token = jwt.sign({ _id: findUser._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
 
-        res.cookie("token", token).send({ status: 200, message: "Logged in successfull." });
+        res.cookie("token", token).send({ status: 200, message: "Logged in successfull.", token: token });
 
     } catch (error) {
         res.send({ status: 500, message: "Data not found." });

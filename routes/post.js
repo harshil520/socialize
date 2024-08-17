@@ -16,5 +16,7 @@ postRoute.get("/getuserpost/:userId", postController.getUserPost);
 postRoute.delete("/delete/:postId", postController.deletePost);
 postRoute.post("/like/:postId", postController.likePost);
 postRoute.post("/dislike/:postId", postController.disLikePost);
+postRoute.post("/save/:postId", postController.savePost);
+postRoute.post("/unsave/:postId", postController.unsavePost);
 
 module.exports = postRoute;

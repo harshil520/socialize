@@ -1,7 +1,7 @@
 const User = require("../models/User");
 const Post = require("../models/Post");
 const Comment = require("../models/Comment");
-const { generateFileURL } = require("../helper/utils");
+const { uploadToCloudinary } = require("../helper/utils");
 
 const createPost = async (req, res) => {
     try {
@@ -37,7 +37,9 @@ const createPostWithImage = async (req, res) => {
         if (!user) {
             return res.send({ status: 404, message: "user not found." });
         }
-        const imageURLs = files.map(file => generateFileURL(file.filename));
+
+        const imageUploadPromises = files.map(file => uploadToCloudinary(file));
+        const imageURLs = await Promise.all(imageUploadPromises);
 
         const post = new Post({
             user: userId,
@@ -206,6 +208,62 @@ const disLikePost = async (req, res) => {
     }
 };
 
+const savePost = async (req, res) => {
+    try {
+        const { postId } = req.params;
+        const { userId } = req.body;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.send({ status: 404, message: "user not found." });
+        }
+
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.send({ status: 404, message: "post not found." });
+        }
+
+        if (user.savedPosts.includes(postId)) {
+            return res.send({ status: 400, message: "post already saved." });
+        }
+
+        user.savedPosts.push(postId);
+        await user.save();
+
+        res.send({ status: 200, message: "post saved." });
+
+    } catch (error) {
+        res.send({ status: 500, message: "Data not found." });
+        console.log(error);
+    }
+};
+
+const unsavePost = async (req, res) => {
+    try {
+        const { postId } = req.params;
+        const { userId } = req.body;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.send({ status: 404, message: "user not found." });
+        }
+
+        if (!user.savedPosts.includes(postId)) {
+            return res.send({ status: 400, message: "post not saved." });
+        }
+
+        user.savedPosts = user.savedPosts.filter(id => id.toString() !== postId);
+        await user.save();
+
+        res.send({ status: 200, message: "post unsaved." });
+
+    } catch (error) {
+        res.send({ status: 500, message: "Data not found." });
+        console.log(error);
+    }
+};
+
+
 module.exports = {
     createPost,
     createPostWithImage,
@@ -214,5 +272,7 @@ module.exports = {
     getUserPost,
     deletePost,
     likePost,
-    disLikePost
+    disLikePost,
+    savePost,
+    unsavePost
 }

@@ -2,7 +2,7 @@ const User = require("../models/User");
 const Post = require("../models/Post");
 const Comment = require("../models/Comment");
 const Story = require("../models/Story");
-const { generateFileURL } = require("../helper/utils");
+const { uploadToCloudinary } = require("../helper/utils");
 
 const getUser = async (req, res) => {
     try {
@@ -195,8 +195,6 @@ const deleteUser = async (req, res) => {
         }
 
         await Post.deleteMany({ user: userId });
-        // await Post.deleteMany({ "comments.user": userId });
-        // await Post.deleteMany({ "comments.replies.user": userId });
         await Comment.deleteMany({ user: userId });
         await Story.deleteMany({ user: userId });
         await Post.updateMany({ likes: userId }, { $pull: { likes: userId } });
@@ -253,7 +251,7 @@ const uploadProfilePicture = async (req, res) => {
         const { userId } = req.params;
         const { filename } = req.file;
 
-        const user = await User.findOneAndUpdate({ _id: userId }, { profilePicture: generateFileURL(filename) }, { new: true });
+        const user = await User.findOneAndUpdate({ _id: userId }, { profilePicture: await uploadToCloudinary(req.file) }, { new: true });
 
         if (!user) {
             return res.send({ status: 404, message: "user not found." });
@@ -267,4 +265,4 @@ const uploadProfilePicture = async (req, res) => {
     }
 }
 
-module.exports = { getUser, updateUser, followUser, unFollowUser, blockUser, unBlockUser, blockList, deleteUser, searchUser, uploadProfilePicture, generateFileURL };
+module.exports = { getUser, updateUser, followUser, unFollowUser, blockUser, unBlockUser, blockList, deleteUser, searchUser, uploadProfilePicture };

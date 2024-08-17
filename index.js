@@ -21,7 +21,6 @@ app.get("/", (req, res) => {
 })
 
 app.listen(3000, () => {
-    console.log("connecting to database...");
     connectDB();
     console.log("database connected.");
     console.log("app is running on port 3000");
